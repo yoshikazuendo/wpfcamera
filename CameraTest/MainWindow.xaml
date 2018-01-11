@@ -1,12 +1,58 @@
 ﻿<Window x:Class="CameraTest.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CameraTest"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:command="http://www.galasoft.ch/mvvmlight"
+        xmlns:video="clr-namespace:CameraTest.Video"
+        xmlns:behavior="clr-namespace:CameraTest.Behavior"
+        xmlns:local="clr-namespace:CameraTest" 
+        Title="カメラスナップショットツール" MinHeight="820" MinWidth="700" Height="820" Width="700"
+        DataContext="{Binding Main, Source={StaticResource Locator}}">
+    <Window.Resources>
+        <ResourceDictionary>
+            <video:MediaInformationConverter x:Key="MediaInformationConverter" />
+        </ResourceDictionary>
+    </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <command:EventToCommand Command="{Binding Mode=OneWay, Path=LoadedCommand}" PassEventArgsToCommand="False" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="ブースA" FontSize="20" HorizontalAlignment="Center"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,0">
+            <TextBlock Text="使用するカメラ: "/>
+            <ComboBox ItemsSource="{Binding MediaDeviceList}" DisplayMemberPath="DisplayName" SelectedValuePath="UsbString" SelectedItem="{Binding SelectedVideoDevice}" Width="200" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        </StackPanel>
+        <TextBlock Grid.Row="2" Margin="0,10,0,0" Text="プレビュー:"/>
+        <Grid Grid.Row="3">
+            <video:WebcamDevice x:Name="CameraVideoDeviceControl" VideoPreviewWidth="640" VideoPreviewHeight="480" HorizontalAlignment="Center" VerticalAlignment="Center" VideoSourceId="{Binding SelectedVideoDevice, Converter={StaticResource MediaInformationConverter}}" SnapshotBitmap="{Binding SnapshotBitmap, Mode=TwoWay}" />
+        </Grid>
+        <Button Grid.Row="4" Margin="0,10,0,0" Content="スナップショットを開始" Width="120" HorizontalAlignment="Right">
+            <behavior:CommandBehaviorCollection.Behaviors>
+                <behavior:BehaviorBinding Event="Click" Command="{Binding TakeSnapshot, ElementName=CameraVideoDeviceControl}" />
+                <behavior:BehaviorBinding Event="Click" Command="{Binding SnapshotCommand}" />
+            </behavior:CommandBehaviorCollection.Behaviors>
+        </Button>
+        <StackPanel Grid.Row="5" Margin="0,10,0,0" HorizontalAlignment="Right" >
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="最後にスナップショットを行った時間:"/>
+                <TextBlock Text="2018/01/10 12:34:56"/>
+            </StackPanel>
+            <Image Source="{Binding SnapshotTaken}" HorizontalAlignment="Right" Width="160" Height="120"/>
+        </StackPanel>
+        <StackPanel Grid.Column="0" Grid.Row="6" Margin="0,10,0,0" Orientation="Horizontal" HorizontalAlignment="Right" >
+            <TextBlock Text="アプリの起動時間:"/>
+            <TextBlock Text="2018/01/10 12:34:56"/>
+        </StackPanel>
     </Grid>
 </Window>
